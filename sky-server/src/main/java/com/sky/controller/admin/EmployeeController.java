@@ -10,7 +10,9 @@ import com.sky.result.PageResult;
 import com.sky.result.Result;
 import com.sky.service.EmployeeService;
 import com.sky.utils.JwtUtil;
+import com.sky.utils.RedisUtil;
 import com.sky.vo.EmployeeLoginVO;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
@@ -24,7 +26,7 @@ import java.util.Map;
  * 员工管理
  */
 @RestController
-@ApiModel("员工管理相关接口")
+@Api(tags = "员工管理相关接口")
 @RequestMapping("/admin/employee")
 @Slf4j
 public class EmployeeController {
@@ -33,7 +35,8 @@ public class EmployeeController {
     private EmployeeService employeeService;
     @Autowired
     private JwtProperties jwtProperties;
-
+    @Autowired
+    private RedisUtil redisUtil;
     /**
      * 登录
      *
@@ -62,6 +65,7 @@ public class EmployeeController {
                 .token(token)
                 .build();
 
+        redisUtil.set(token, employeeLoginVO.getId());
         return Result.success(employeeLoginVO);
     }
 
@@ -72,7 +76,9 @@ public class EmployeeController {
      */
     @PostMapping("/logout")
     @ApiOperation("退出")
-    public Result logout() {
+    public Result logout(@RequestHeader("token") String token) {
+        // 删除redis中的令牌
+        redisUtil.del(token);
         return Result.success();
     }
 

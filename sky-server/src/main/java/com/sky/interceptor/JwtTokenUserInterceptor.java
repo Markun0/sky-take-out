@@ -4,6 +4,7 @@ import com.sky.constant.JwtClaimsConstant;
 import com.sky.context.BaseContext;
 import com.sky.properties.JwtProperties;
 import com.sky.utils.JwtUtil;
+import com.sky.utils.RedisUtil;
 import io.jsonwebtoken.Claims;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,8 @@ public class JwtTokenUserInterceptor implements HandlerInterceptor {
 
     @Autowired
     private JwtProperties jwtProperties;
+    @Autowired
+    private RedisUtil redisUtil;
 
     /**
      * 校验jwt
@@ -50,6 +53,11 @@ public class JwtTokenUserInterceptor implements HandlerInterceptor {
             Long userId = Long.valueOf(claims.get(JwtClaimsConstant.USER_ID).toString());
             log.info("当前员工id：", userId);
             BaseContext.setCurrentId(userId);
+            Boolean redisResult = redisUtil.hasKey(token);
+            if (!redisResult) {
+                response.setStatus(401);
+                return false;
+            }
             //3、通过，放行
             return true;
         } catch (Exception ex) {
