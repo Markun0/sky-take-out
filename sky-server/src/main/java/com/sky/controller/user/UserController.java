@@ -1,5 +1,6 @@
 package com.sky.controller.user;
 
+import com.sky.constant.JwtClaimsConstant;
 import com.sky.dto.UserLoginDTO;
 import com.sky.entity.User;
 import com.sky.properties.JwtProperties;
@@ -37,20 +38,21 @@ public class UserController {
     @PostMapping("/login")
     @ApiOperation("用户登陆")
     public Result login(@RequestBody UserLoginDTO userDTO){
+        
         System.out.println("用户登陆");
         User user = userService.wxlogin(userDTO);
         // jwt
         HashMap<String, Object> claims = new HashMap<>();
-        claims.put("id", user.getId());
+        claims.put(JwtClaimsConstant.USER_ID, user.getId());
         String token = JwtUtil.createJWT(
                 jwtProperties.getUserSecretKey(),
                 jwtProperties.getUserTtl(),
                 claims);
 
-        redisUtil.set(token,user.getId());
+        redisUtil.set(token,user);
         UserLoginVO userLoginVO = UserLoginVO.builder()
                .id(user.getId())
-                .openid(user.getName())
+                .openid(user.getOpenid())
                 .token(token)
                .build();
         return Result.success(userLoginVO);

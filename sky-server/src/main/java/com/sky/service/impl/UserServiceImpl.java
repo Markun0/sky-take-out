@@ -31,13 +31,15 @@ public class UserServiceImpl implements UserService {
         if(openid==null){
             throw new LoginFailedException(MessageConstant.LOGIN_FAILED);
         }
+//        String openid = "123456";
         User user1 = userMapper.getByOpenId(openid);
-        if(user1==null){
+        if(user1==null) {
             user1 = User.builder()
-                   .openid(openid)
+                    .openid(openid)
                     .createTime(LocalDateTime.now())
-                   .build();
+                    .build();
             userMapper.insert(user1);
+            user1 = userMapper.getByOpenId(openid);
         }
         return user1;
     }

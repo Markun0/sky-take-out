@@ -6,6 +6,7 @@ sky:
     database: sky_take_out
     username: root
     password: 123456
+    dialect: mysql
   alioss:
       endpoint: oss-cn-beijing.aliyuncs.com
       access-key-id: LTAI5t6Nhfc6sWU7uxBYdkjH
@@ -19,3 +20,10 @@ sky:
   wechat:
     appid: wx727e2494136f6bcf
     appsecret: 2211f19c74d4e2b5b0307ea7f8402912
+  jwt:
+    admin-secret-key: Mark0
+    admin-ttl: 7200000000000
+    admin-token-name: token
+    user-secret-key: Mark0
+    user-ttl: 7200000000000
+    user-token-name: token
