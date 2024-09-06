@@ -48,6 +48,9 @@ sky:
     user-ttl: ${sky.jwt.user-ttl}
     user-token-name: ${sky.jwt.user-token-name}
 
+  reids:
+    login-ttl: ${sky.redis.login-ttl}
+
   alioss:
     endpoint: ${sky.aliyunoss.endpoint}
     access-key-id: ${sky.aliyunoss.access-key-id}

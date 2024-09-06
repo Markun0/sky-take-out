@@ -24,7 +24,7 @@ public class ShopController {
         log.info("设置店铺营业状态为: {}", status);
 //        redisTemplate.opsForValue().set(SHOP_STATUS, status);
         redisUtil.set(SHOP_STATUS, status);
-        return Result.success();
+        return Result.success(status);
     }
 
     @GetMapping("/status")

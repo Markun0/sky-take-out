@@ -6,6 +6,7 @@ import com.sky.dto.EmployeeLoginDTO;
 import com.sky.dto.EmployeePageQueryDTO;
 import com.sky.entity.Employee;
 import com.sky.properties.JwtProperties;
+import com.sky.properties.RedisProperties;
 import com.sky.result.PageResult;
 import com.sky.result.Result;
 import com.sky.service.EmployeeService;
@@ -37,6 +38,8 @@ public class EmployeeController {
     private JwtProperties jwtProperties;
     @Autowired
     private RedisUtil redisUtil;
+    @Autowired
+    private RedisProperties redisProperties;
     /**
      * 登录
      *
@@ -65,7 +68,7 @@ public class EmployeeController {
                 .token(token)
                 .build();
 
-        redisUtil.set(token, employeeLoginVO.getId());
+        redisUtil.set(token, employeeLoginVO.getId(),redisProperties.getLOGIN_TTL());
         return Result.success(employeeLoginVO);
     }
 

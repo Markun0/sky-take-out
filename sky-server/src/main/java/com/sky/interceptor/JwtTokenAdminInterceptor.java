@@ -50,8 +50,8 @@ public class JwtTokenAdminInterceptor implements HandlerInterceptor {
             log.info("jwt校验:{}", token);
             Claims claims = JwtUtil.parseJWT(jwtProperties.getAdminSecretKey(), token);
             Long empId = Long.valueOf(claims.get(JwtClaimsConstant.EMP_ID).toString());
-            Boolean redisResult = redisUtil.hasKey(token);
-            if (!redisResult) {
+            Long id = (Long) redisUtil.get(token);
+            if (id==null || !id.equals(empId)) {
                 response.setStatus(401);
                 return false;
             }

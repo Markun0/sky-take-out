@@ -31,7 +31,7 @@ public class UserServiceImpl implements UserService {
         if(openid==null){
             throw new LoginFailedException(MessageConstant.LOGIN_FAILED);
         }
-//        String openid = "123456";
+//        String openid = "13302710135";
         User user1 = userMapper.getByOpenId(openid);
         if(user1==null) {
             user1 = User.builder()

@@ -4,6 +4,7 @@ import com.sky.constant.JwtClaimsConstant;
 import com.sky.dto.UserLoginDTO;
 import com.sky.entity.User;
 import com.sky.properties.JwtProperties;
+import com.sky.properties.RedisProperties;
 import com.sky.result.Result;
 import com.sky.service.UserService;
 import com.sky.utils.JwtUtil;
@@ -34,6 +35,8 @@ public class UserController {
 
     @Autowired
     private RedisUtil redisUtil;
+    @Autowired
+    private RedisProperties redisProperties;
     //  登陆
     @PostMapping("/login")
     @ApiOperation("用户登陆")
@@ -49,7 +52,7 @@ public class UserController {
                 jwtProperties.getUserTtl(),
                 claims);
 
-        redisUtil.set(token,user);
+        redisUtil.set(token,user.getId(),redisProperties.getLOGIN_TTL());
         UserLoginVO userLoginVO = UserLoginVO.builder()
                .id(user.getId())
                 .openid(user.getOpenid())

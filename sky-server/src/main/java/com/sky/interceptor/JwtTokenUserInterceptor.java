@@ -53,8 +53,8 @@ public class JwtTokenUserInterceptor implements HandlerInterceptor {
             Long userId = Long.valueOf(claims.get(JwtClaimsConstant.USER_ID).toString());
             log.info("当前用户id：", userId);
             BaseContext.setCurrentId(userId);
-            Boolean redisResult = redisUtil.hasKey(token);
-            if (!redisResult) {
+            Long id = (Long) redisUtil.get(token);
+            if (id==null || !id.equals(userId)) {
                 response.setStatus(401);
                 return false;
             }
