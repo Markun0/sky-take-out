@@ -15,6 +15,7 @@ import com.sky.mapper.DishMapper;
 import com.sky.mapper.SetmealDishMapper;
 import com.sky.result.PageResult;
 import com.sky.service.DishService;
+import com.sky.utils.RedisUtil;
 import com.sky.vo.DishVO;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -39,14 +40,17 @@ public class DishServiceImpl implements DishService {
     @Autowired
     private SetmealDishMapper setmealDishMapper;
 
+    @Autowired
+    private RedisUtil redisUtil;
+
     /**
      * 条件查询菜品和口味
      * @param dish
      * @return
      */
     public List<DishVO> listWithFlavor(Dish dish) {
-        List<Dish> dishList = dishMapper.list(dish);
-
+//        List<Dish> dishList = dishMapper.list(dish.getCategoryId());
+        List<Dish> dishList = redisUtil.getCache("dish:category", dish.getCategoryId(), categoryId -> dishMapper.list(categoryId));
         List<DishVO> dishVOList = new ArrayList<>();
 
         for (Dish d : dishList) {
@@ -54,8 +58,8 @@ public class DishServiceImpl implements DishService {
             BeanUtils.copyProperties(d,dishVO);
 
             //根据菜品id查询对应的口味
-            List<DishFlavor> flavors = dishFlavorMapper.getByDishId(d.getId());
-
+//            List<DishFlavor> flavors = dishFlavorMapper.getByDishId(d.getId());
+            List<DishFlavor> flavors = redisUtil.getCache("dish:flavor", d.getId(), id -> dishFlavorMapper.getByDishId(id));
             dishVO.setFlavors(flavors);
             dishVOList.add(dishVO);
         }
@@ -88,7 +92,8 @@ public class DishServiceImpl implements DishService {
 
     public PageResult page(DishPageQueryDTO dishPageQueryDTO) {
         PageHelper.startPage(dishPageQueryDTO.getPage(), dishPageQueryDTO.getPageSize());
-        Page<DishVO> page = dishMapper.pageQuery(dishPageQueryDTO);
+//        Page<DishVO> page = dishMapper.pageQuery(dishPageQueryDTO);
+        Page<DishVO> page = redisUtil.getCache("dish:page", dishPageQueryDTO, dishPageQueryDTO1 -> dishMapper.pageQuery(dishPageQueryDTO1));
         return new PageResult(page.getTotal(), page.getResult());
     }
 
@@ -96,29 +101,34 @@ public class DishServiceImpl implements DishService {
     public void deleteBatch(List<Long> ids) {
         // 判断当前菜品是否能删除--是否存在起售中的菜品
         for(Long id: ids){
-            Dish dish = dishMapper.getById(id);
+//            Dish dish = dishMapper.getById(id);
+            Dish dish = redisUtil.getCache("dish:id", id, id1 -> dishMapper.getById(id1));
             if(dish.getStatus().equals(StatusConstant.ENABLE)){
                 // 当前菜品处于起售中,不能删除
                 throw new DeletionNotAllowedException(MessageConstant.DISH_ON_SALE);
             }
         }
         // 判断当前菜品是否能删除--是否被套餐关联
-        List<Long> setmealIds = setmealDishMapper.getSetmealIdByDishIds(ids);
+//        List<Long> setmealIds = setmealDishMapper.getSetmealIdByDishIds(ids);
+        List<Long> setmealIds = redisUtil.getCache("dish:setmeal", ids, ids1 -> setmealDishMapper.getSetmealIdByDishIds(ids1));
         if(setmealIds != null && setmealIds.size() > 0){
             // 当前那菜品被套餐关联了
             throw new DeletionNotAllowedException(MessageConstant.DISH_BE_RELATED_BY_SETMEAL);
         }
         // 删除菜品表中的菜品数据
-        dishMapper.deleteByIds(ids);
+//        dishMapper.deleteByIds(ids);
+        redisUtil.delCache("dish:id", ids, ids1 -> dishMapper.deleteByIds(ids1));
         // 删除菜品关联的口味数据
         dishFlavorMapper.deleteByDishIds(ids);
     }
 
     public DishVO getById(Long id) {
-        Dish dish = dishMapper.getById(id);
+//        Dish dish = dishMapper.getById(id);
+        Dish dish = redisUtil.getCache("dish:id", id, id1 -> dishMapper.getById(id1));
         DishVO dishVO = new DishVO();
         BeanUtils.copyProperties(dish, dishVO);
-        List<DishFlavor> flavors = dishFlavorMapper.getByDishId(id);
+//        List<DishFlavor> flavors = dishFlavorMapper.getByDishId(id);
+        List<DishFlavor> flavors = redisUtil.getCache("dish:flavor", id, id1 -> dishFlavorMapper.getByDishId(id1));
         dishVO.setFlavors(flavors);
         return dishVO;
     }
@@ -128,11 +138,12 @@ public class DishServiceImpl implements DishService {
         log.info("修改菜品:{}", dishDTO);
         Dish dish = new Dish();
         BeanUtils.copyProperties(dishDTO, dish);
-        dishMapper.update(dish);
+//        dishMapper.update(dish);
+        redisUtil.delCache("dish:id", dishDTO.getId(), dish, dish1 -> dishMapper.update(dish1));
 
         // 删除原来的口味数据
-        dishFlavorMapper.deleteByDishId(dishDTO.getId());
-
+//        dishFlavorMapper.deleteByDishId(dishDTO.getId());
+        redisUtil.delCache("dish:flavor", dishDTO.getId(), id -> dishFlavorMapper.deleteByDishId(id));
         // 添加新的口味数据
         List<DishFlavor> flavors = dishDTO.getFlavors();
         if(flavors != null && flavors.size() > 0){

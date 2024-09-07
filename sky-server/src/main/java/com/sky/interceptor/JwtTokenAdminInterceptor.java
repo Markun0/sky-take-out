@@ -55,7 +55,7 @@ public class JwtTokenAdminInterceptor implements HandlerInterceptor {
                 response.setStatus(401);
                 return false;
             }
-            log.info("当前员工id：", empId);
+            log.info("当前员工id：" + empId);
             BaseContext.setCurrentId(empId);
             //3、通过，放行
             return true;

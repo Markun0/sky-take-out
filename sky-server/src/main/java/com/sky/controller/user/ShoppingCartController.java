@@ -1,7 +1,6 @@
 package com.sky.controller.user;
 
 import com.sky.dto.ShoppingCartDTO;
-import com.sky.entity.ShoppingCart;
 import com.sky.result.Result;
 import com.sky.service.ShoppingCartService;
 import io.swagger.annotations.Api;

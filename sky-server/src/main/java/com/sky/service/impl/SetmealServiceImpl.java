@@ -16,6 +16,7 @@ import com.sky.mapper.SetmealDishMapper;
 import com.sky.mapper.SetmealMapper;
 import com.sky.result.PageResult;
 import com.sky.service.SetmealService;
+import com.sky.utils.RedisUtil;
 import com.sky.vo.DishItemVO;
 import com.sky.vo.SetmealVO;
 import lombok.extern.slf4j.Slf4j;
@@ -38,6 +39,8 @@ public class SetmealServiceImpl implements SetmealService {
     private SetmealDishMapper setmealDishMapper;
     @Autowired
     private DishMapper dishMapper;
+    @Autowired
+    private RedisUtil redisUtil;
 
     /**
      * 条件查询
@@ -45,7 +48,8 @@ public class SetmealServiceImpl implements SetmealService {
      * @return
      */
     public List<Setmeal> list(Setmeal setmeal) {
-        List<Setmeal> list = setmealMapper.list(setmeal);
+//        List<Setmeal> list = setmealMapper.list(setmeal);
+        List<Setmeal> list = redisUtil.getCache("setmeal:List",setmeal, (setmeal1) -> setmealMapper.list(setmeal1));
         return list;
     }
 
@@ -55,6 +59,7 @@ public class SetmealServiceImpl implements SetmealService {
      * @return
      */
     public List<DishItemVO> getDishItemById(Long id) {
-        return setmealMapper.getDishItemBySetmealId(id);
+        List<DishItemVO> list = redisUtil.getCache("setmeal:dish",id,(id1) -> setmealMapper.getDishItemBySetmealId(id1));
+        return list;
     }
 }
