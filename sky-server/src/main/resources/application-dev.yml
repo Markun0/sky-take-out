@@ -20,7 +20,15 @@ sky:
     login-ttl: 20000000000000
   wechat:
     appid: wx727e2494136f6bcf
-    appsecret: 2211f19c74d4e2b5b0307ea7f8402912
+    secret: 2211f19c74d4e2b5b0307ea7f8402912
+    mchid: 1669265021
+    mchSerialNo: 166926502101
+    privateKeyFilePath: D:\workspace\sky-take-out\src\main\resources\apiclient_key.pem
+    apiV3Key: 166926502101
+    weChatPayCertFilePath: D:\workspace\sky-take-out\src\main\resources\apiclient_cert.pem
+    notifyUrl: URL_ADDRESS
+    refundNotifyUrl: URL_ADDRESS/refund
+
   jwt:
     admin-secret-key: Mark0
     admin-ttl: 7200000000000
